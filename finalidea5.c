@@ -554,19 +554,19 @@ else {
               insert(trie->roots[firstLetterIndex], &str[1]);
            }
            else {
-              // int stringIndex = 1;
-              // int nextCharIndex = str[stringIndex] - 'a';
-              // struct TrieNode *nodePtr = trie->roots[firstLetterIndex]->children[nextCharIndex];
+              int stringIndex = 1;
+              int nextCharIndex = str[stringIndex] - 'a';
+              struct TrieNode *nodePtr = trie->roots[firstLetterIndex]->children[nextCharIndex];
 
-              // while (str[stringIndex] != '\0') {
-              //    if (nodePtr == NULL) {
-              //       nodePtr = getNode();
-              //       insert(nodePtr, &str[stringIndex]);
-              //    }
+              while (str[stringIndex] != '\0') {
+                 if (nodePtr == NULL) {
+                    nodePtr = getNode();
+                    insert(nodePtr, &str[stringIndex]);
+                 }
                  
-              //    stringIndex++;
-              //    nodePtr = nodePtr->children[str[stringIndex] - 'a'];
-              // }
+                 stringIndex++;
+                 nodePtr = nodePtr->children[str[stringIndex] - 'a'];
+              }
             }
         }
 
