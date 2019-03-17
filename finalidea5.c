@@ -36,12 +36,13 @@ struct Edge {  // stores the graph's edges
 struct TrieNode
 {
     struct TrieNode *children[27];
+    char letter;
     int end; // 1 if the end of a word and 2 if not
 };
 
 struct Trie
 {
-   struct TrieNode* roots[27]; // trying to make one trie that I can search
+   struct TrieNode *roots[27]; // trying to make one trie that I can search
 
 };
 
@@ -156,14 +157,14 @@ void setTimeout(int milliseconds)
 // Returns new trie node (initialized to NULL)
 struct TrieNode *getNode(void)
 {
-    struct TrieNode *new = NULL;
-    new = (struct TrieNode *)malloc(sizeof(struct TrieNode));
+    struct TrieNode * new = (struct TrieNode *)malloc(sizeof(struct TrieNode));
 
     if (new)
     {
         new -> end = 2;
-        for (int i = 0; i < 27; i++)
+        for (int i = 0; i < 27; i++) {
             new -> children[i] = NULL;
+        }
     }
 
     return new;
@@ -172,18 +173,26 @@ struct TrieNode *getNode(void)
 
 // If not present, inserts key into trie
 // If the key is prefix of trie node, just marks leaf node
-void insert(struct TrieNode* *root, char *str)
+void insert(struct TrieNode *branch, char *str)
 {
-    struct TrieNode* curr = *root;
-    while (*str) {
-      if (curr -> children[*str - 'a'] == NULL) {
-        curr -> children[*str - 'a'] = getNode();
-      }
+  struct TrieNode * newNode;
 
-      curr = curr -> children[*str - 'a'];
-      str++;
+  while (*str) {
+    if (branch->children[*str - 'a'] == NULL) {
+       newNode = getNode();
+       branch->children[*str - 'a'] = newNode;
+       newNode->letter = *str;
     }
-    curr -> end = 1;
+
+    str++;
+
+    if (str != NULL) {
+      newNode->end = 2;
+    }
+    else {
+      newNode->end = 1;
+    }
+  }
 }
 
 
@@ -523,43 +532,51 @@ for (int i = 0; i < 27; i++) {
   trie -> roots[i] = NULL;
 }
 
-dictionary = fopen("C:\\cygwin64\\home\\ally price\\cs201projectidea\\words.txt", "r"); 
+// dictionary = fopen("C:\\cygwin64\\home\\ally price\\cs201projectidea\\words.txt", "r"); 
+dictionary = fopen("words.txt", "r");
 if (dictionary == NULL) {
   printf("Error! Can't find the dictionary file!\n");
 }
-
-
 else {
-// this is seg faulting after opening the file
+    // this is seg faulting after opening the file
     printf("\n\nOpened file successfully!\n");
-    while(fgets(str, sizeof(str), dictionary) != NULL) {
-       struct TrieNode *root = getNode();// need to call this for each new first letter!
-       if ((strlen(str) > 2) && (!(str[0] >= 'A' && str[0] <= 'Z'))) {
-           if (strchr(trie -> roots[0], str[0]) == NULL) { // if the first letter isnt in the array of first letters
-             struct TrieNode *root = getNode();
-             trie -> roots[w] = root;
-             insert(&trie -> roots[w], str);
-             w++;
-             insertedWords++;
-             printf("Inserted %s", str);
-           }
+    struct TrieNode *root = getNode();// need to call this for each new first letter!
 
+    while(fgets(str, sizeof(str), dictionary) != NULL) {
+       
+       if ((strlen(str) > 2) && (!(str[0] >= 'A' && str[0] <= 'Z'))) {
+
+           int firstLetterIndex = str[0] - 'a';
+
+           if (trie->roots[firstLetterIndex] == NULL) { // if the first letter isnt in the array of first letters
+              trie->roots[firstLetterIndex] = getNode();
+              trie->roots[firstLetterIndex]->letter = str[0];
+              insert(trie->roots[firstLetterIndex], &str[1]);
+           }
            else {
-             for (int i = 0; i < 27; i ++) {
-               if (str[0] == trie -> roots[i]) {
-                insert(&trie -> roots[i], str);
-                insertedWords++;
-                printf("Inserted %s", str);
-              }
+              // int stringIndex = 1;
+              // int nextCharIndex = str[stringIndex] - 'a';
+              // struct TrieNode *nodePtr = trie->roots[firstLetterIndex]->children[nextCharIndex];
+
+              // while (str[stringIndex] != '\0') {
+              //    if (nodePtr == NULL) {
+              //       nodePtr = getNode();
+              //       insert(nodePtr, &str[stringIndex]);
+              //    }
+                 
+              //    stringIndex++;
+              //    nodePtr = nodePtr->children[str[stringIndex] - 'a'];
+              // }
             }
-          }
         }
 
+        insertedWords++;
+        printf("Inserted %s", str);
+      }
     }
-  }
 
 
-printf("\n\n%d Words were inserted into the trie\n", insertedWords);
+ printf("\n\n%d Words were inserted into the trie\n", insertedWords);
 /*
 for(int a = 0; a < 4; a ++) {
    printf("\nEnter Word (one by one): ");
